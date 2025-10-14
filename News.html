@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aetherix - News</title>
+<style>
+body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; }
+header { background:#009688; color:white; padding:20px; text-align:center; }
+nav { background:#004d40; display:flex; justify-content:center; }
+nav a { color:white; padding:15px 25px; text-decoration:none; }
+nav a:hover { background:#00796b; }
+section { padding:30px; }
+.article { background:#b2dfdb; margin:10px auto; padding:10px; border-radius:10px; max-width:700px; }
+</style>
+</head>
+<body>
+<header><h1>Climate News & SDG Articles</h1></header>
+<nav>
+<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+</nav>
+<section>
+<h2>Live Climate News</h2>
+<div id="liveNews"></div>
+<h2>Static SDG-13 Articles</h2>
+<div class="article">
+<h3>SDG 13: Climate Action</h3>
+<p>Take urgent action to combat climate change and its impacts.</p>
+</div>
+<div class="article">
+<h3>Reducing Carbon Footprints</h3>
+<p>Learn practical steps to reduce CO₂ emissions in daily life.</p>
+</div>
+</section>
+
+<script>
+const newsAPIKey = "YOUR_NEWSAPI_KEY";
+async function fetchNews() {
+    const res = await fetch(`https://newsapi.org/v2/everything?q=climate&sortBy=publishedAt&apiKey=${newsAPIKey}`);
+    const data = await res.json();
+    let html = "";
+    data.articles.slice(0,5).forEach(a => {
+        html += `<div class="article"><h3>${a.title}</h3><p>${a.description || ''}</p><a href="${a.url}" target="_blank">Read more</a></div>`;
+    });
+    document.getElementById('liveNews').innerHTML = html;
+}
+fetchNews();
+</script>
+</body>
+</html>
