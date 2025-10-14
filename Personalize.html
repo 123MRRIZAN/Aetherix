@@ -12,12 +12,11 @@ nav { background:#004d40; display:flex; justify-content:center; flex-wrap:wrap; 
 nav a { color:white; padding:10px 20px; margin:2px; text-decoration:none; }
 nav a:hover, nav a.active { background:#00796b; }
 section { padding:20px; }
-input, select { padding:5px; margin:5px; }
+input { padding:5px; margin:5px; width:150px; }
 button { padding:10px 20px; margin:5px; background:#009688; color:white; border:none; cursor:pointer; }
 button:hover { background:#00796b; }
-video, canvas { border:1px solid #004d40; margin-top:10px; }
-.card { background:white; padding:15px; border-radius:10px; display:inline-block; margin-top:10px; }
-.hidden { display:none; }
+canvas { display:none; }
+video { border:1px solid #004d40; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -25,6 +24,7 @@ video, canvas { border:1px solid #004d40; margin-top:10px; }
 <header>
 <h1>Aetherix — Personalize</h1>
 </header>
+
 <nav>
 <a href="personalize.html" class="active">Personalize</a>
 <a href="faceid.html">Face ID</a>
@@ -35,70 +35,79 @@ video, canvas { border:1px solid #004d40; margin-top:10px; }
 
 <section>
 <h2>Enter Your Details & Capture Face</h2>
-
-<div class="card">
-<input type="text" id="name" placeholder="Name"><br>
-<input type="number" id="age" placeholder="Age"><br>
-<input type="text" id="gender" placeholder="Gender"><br>
+<label>Name: <input type="text" id="name" placeholder="Name"></label><br>
+<label>Age: <input type="number" id="age" placeholder="Age"></label><br>
+<label>Gender: <input type="text" id="gender" placeholder="Gender"></label><br>
 
 <video id="video" width="320" height="240" autoplay muted></video><br>
+
 <button id="startCameraBtn">Start Camera</button>
-<button id="captureBtn" disabled>Capture Face & Save Profile</button>
+<button id="captureBtn" disabled>Capture Face</button>
+<button id="saveProfileBtn">Save Profile</button>
 <button id="downloadBtn">Download Profile Card</button>
 
-<canvas id="canvas" width="320" height="240" class="hidden"></canvas>
-</div>
+<canvas id="canvas" width="320" height="240"></canvas>
 </section>
 
 <script>
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const startBtn = document.getElementById('startCameraBtn');
-const captureBtn = document.getElementById('captureBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-
-let capturedDescriptor = null;
-
-// Load Face API models
+// Load face-api models
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights'),
   faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights'),
   faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights')
-]).then(() => console.log("Models loaded"));
+]);
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const startCameraBtn = document.getElementById('startCameraBtn');
+const captureBtn = document.getElementById('captureBtn');
+const saveProfileBtn = document.getElementById('saveProfileBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+let capturedDescriptor = null;
 
 // Start camera
-startBtn.addEventListener('click', () => {
-  navigator.mediaDevices.getUserMedia({ video:{} })
-  .then(stream => { video.srcObject = stream; captureBtn.disabled = false; })
-  .catch(err => alert("Camera error: " + err));
+startCameraBtn.addEventListener('click', async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+  video.srcObject = stream;
+  captureBtn.disabled = false;
 });
 
-// Capture face & save profile
+// Capture face descriptor
 captureBtn.addEventListener('click', async () => {
+  const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                      .withFaceLandmarks().withFaceDescriptor();
+  if(!detection) { alert("No face detected!"); return; }
+  capturedDescriptor = detection.descriptor;
+  alert("Face captured successfully!");
+});
+
+// Save profile
+saveProfileBtn.addEventListener('click', () => {
   const name = document.getElementById('name').value;
   const age = document.getElementById('age').value;
   const gender = document.getElementById('gender').value;
-  if(!name || !age || !gender){ alert("Fill all fields!"); return; }
 
-  const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-                     .withFaceLandmarks().withFaceDescriptor();
-  if(!detection){ alert("No face detected!"); return; }
-  capturedDescriptor = detection.descriptor;
+  if(!name || !age || !gender || !capturedDescriptor){
+    alert("Please fill all fields and capture your face.");
+    return;
+  }
 
+  // Capture photo
   canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+  const photo = canvas.toDataURL('image/png');
 
-  let profiles = JSON.parse(localStorage.getItem('profiles')||"[]");
-  profiles.push({name, age, gender, descriptor:Array.from(capturedDescriptor), photo: canvas.toDataURL()});
+  let profiles = JSON.parse(localStorage.getItem('profiles') || "[]");
+  profiles.push({name, age, gender, photo, descriptor: Array.from(capturedDescriptor)});
   localStorage.setItem('profiles', JSON.stringify(profiles));
-  alert("Profile saved successfully!");
+  alert("Profile saved!");
 });
 
 // Download profile card
 downloadBtn.addEventListener('click', () => {
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#b2dfdb';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(video,0,0,canvas.width,canvas.height);
   ctx.fillStyle = '#004d40';
   ctx.font = '16px Arial';
   ctx.fillText(`Name: ${document.getElementById('name').value}`, 10, 200);
@@ -111,6 +120,5 @@ downloadBtn.addEventListener('click', () => {
   link.click();
 });
 </script>
-
 </body>
 </html>
