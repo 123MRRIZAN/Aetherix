@@ -3,55 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <title>Aetherix - Personalize</title>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <style>
 body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
 header { background:#009688; color:white; padding:20px; }
 nav { background:#004d40; display:flex; justify-content:center; }
 nav a { color:white; padding:15px 25px; text-decoration:none; }
 nav a:hover { background:#00796b; }
-section { padding:30px; }
+section { padding:20px; }
 input { padding:5px; margin:5px; }
-button { padding:10px 20px; margin-top:10px; background:#009688; color:white; border:none; cursor:pointer; }
+button { padding:10px 20px; margin:5px; background:#009688; color:white; border:none; cursor:pointer; }
 button:hover { background:#00796b; }
-canvas { display:none; }
+canvas { margin-top:10px; border:1px solid #004d40; }
+video { border:1px solid #004d40; margin-top:10px; }
 </style>
 </head>
 <body>
-<header><h1>Personalized Profile Card</h1></header>
+<header>
+<h1><span>Aetherix</span> - Personalize</h1>
+</header>
 <nav>
 <a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
 </nav>
 <section>
-<h2>Enter Your Details</h2>
+<h2>Enter Your Details & Capture Face</h2>
 <input type="text" id="name" placeholder="Name"><br>
 <input type="number" id="age" placeholder="Age"><br>
 <input type="text" id="gender" placeholder="Gender"><br>
-<button onclick="generateCard()">Generate Profile PNG</button>
-<canvas id="cardCanvas" width="400" height="200"></canvas>
+<video id="video" width="320" height="240" autoplay muted></video><br>
+<button onclick="captureFace()">Capture Face</button>
+<button onclick="saveProfile()">Save Profile</button>
+<button onclick="downloadCard()">Download Profile Card</button>
+<canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
 </section>
 
 <script>
-function generateCard() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
+// Load models
+Promise.all([
+  faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights')
+]).then(startVideo);
 
-    const canvas = document.getElementById('cardCanvas');
-    canvas.style.display = 'block';
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#b2dfdb';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#004d40';
-    ctx.font = '20px Arial';
-    ctx.fillText(`Name: ${name}`, 20, 50);
-    ctx.fillText(`Age: ${age}`, 20, 90);
-    ctx.fillText(`Gender: ${gender}`, 20, 130);
+// Start webcam
+const video = document.getElementById('video');
+function startVideo(){
+  navigator.mediaDevices.getUserMedia({ video:{} })
+  .then(stream => video.srcObject = stream)
+  .catch(err => console.error("Webcam error:", err));
+}
 
-    // Download PNG
-    const link = document.createElement('a');
-    link.download = 'profile_card.png';
-    link.href = canvas.toDataURL();
-    link.click();
+let capturedDescriptor = null;
+
+async function captureFace(){
+  const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+  if(!detection){ alert("No face detected!"); return; }
+  capturedDescriptor = detection.descriptor;
+  alert("Face captured successfully!");
+}
+
+function saveProfile(){
+  const name = document.getElementById('name').value;
+  const age = document.getElementById('age').value;
+  const gender = document.getElementById('gender').value;
+  if(!name || !age || !gender || !capturedDescriptor){ alert("Please enter all details and capture face."); return; }
+
+  // Get photo
+  const canvasEl = document.getElementById('canvas');
+  canvasEl.getContext('2d').drawImage(video,0,0,canvasEl.width,canvasEl.height);
+  const photo = canvasEl.toDataURL('image/png');
+
+  // Store profile in localStorage
+  let profiles = JSON.parse(localStorage.getItem('profiles')||"[]");
+  profiles.push({name, age, gender, photo, descriptor:Array.from(capturedDescriptor)});
+  localStorage.setItem('profiles', JSON.stringify(profiles));
+  alert("Profile saved successfully!");
+}
+
+function downloadCard(){
+  const canvasEl = document.getElementById('canvas');
+  const ctx = canvasEl.getContext('2d');
+  ctx.clearRect(0,0,canvasEl.width,canvasEl.height);
+  ctx.fillStyle = '#b2dfdb';
+  ctx.fillRect(0,0,canvasEl.width,canvasEl.height);
+  ctx.drawImage(video,0,0,canvasEl.width,canvasEl.height);
+  ctx.fillStyle = '#004d40';
+  ctx.font = '18px Arial';
+  const name = document.getElementById('name').value;
+  const age = document.getElementById('age').value;
+  const gender = document.getElementById('gender').value;
+  ctx.fillText(`Name: ${name}`, 10, 200);
+  ctx.fillText(`Age: ${age}`, 10, 220);
+  ctx.fillText(`Gender: ${gender}`, 10, 240);
+
+  const link = document.createElement('a');
+  link.download = 'profile_card.png';
+  link.href = canvasEl.toDataURL();
+  link.click();
 }
 </script>
 </body>
