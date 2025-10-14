@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aetherix - Face ID</title>
+<style>
+body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
+header { background:#009688; color:white; padding:20px; }
+nav { background:#004d40; display:flex; justify-content:center; }
+nav a { color:white; padding:15px 25px; text-decoration:none; }
+nav a:hover { background:#00796b; }
+section { padding:30px; }
+input, button { padding:5px; margin:5px; }
+</style>
+</head>
+<body>
+<header><h1>Face Recognition</h1></header>
+<nav>
+<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+</nav>
+<section>
+<h2>Enter Name to Simulate Face Recognition</h2>
+<input type="text" id="person" placeholder="Enter Name">
+<button onclick="identify()">Identify</button>
+<p id="details"></p>
+</section>
+
+<script>
+const peopleDB = {
+    "Alice": {age:25, profession:"Scientist"},
+    "Bob": {age:30, profession:"Engineer"},
+    "Charlie": {age:28, profession:"Researcher"}
+};
+
+function identify() {
+    const name = document.getElementById('person').value;
+    if(peopleDB[name]) {
+        document.getElementById('details').innerText = `Name: ${name}, Age: ${peopleDB[name].age}, Profession: ${peopleDB[name].profession}`;
+    } else {
+        document.getElementById('details').innerText = "Person not recognized.";
+    }
+}
+</script>
+</body>
+</html>
