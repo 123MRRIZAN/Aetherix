@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aetherix - Maths & Atmosphere</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
+header { background:#009688; color:white; padding:20px; }
+nav { background:#004d40; display:flex; justify-content:center; }
+nav a { color:white; padding:15px 25px; text-decoration:none; }
+nav a:hover { background:#00796b; }
+section { padding:30px; }
+input { padding:5px; margin:5px; }
+button { padding:10px 20px; margin-top:10px; background:#009688; color:white; border:none; cursor:pointer; }
+button:hover { background:#00796b; }
+</style>
+</head>
+<body>
+<header><h1>Atmospheric Data & Math Modeling</h1></header>
+<nav>
+<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+</nav>
+<section>
+<h2>CO₂ Emissions Graph</h2>
+<label>Enter Days: <input type="number" id="days" value="7"></label><br>
+<button onclick="plotGraph()">Plot CO₂</button>
+<canvas id="co2Chart" width="400" height="300"></canvas>
+</section>
+
+<script>
+function plotGraph() {
+    const days = Number(document.getElementById('days').value);
+    const labels = [];
+    const data = [];
+    for(let i=1;i<=days;i++){ labels.push(`Day ${i}`); data.push(Math.floor(Math.random()*50 + 50)); }
+
+    if(window.co2Chart) window.co2Chart.destroy();
+    const ctx = document.getElementById('co2Chart').getContext('2d');
+    window.co2Chart = new Chart(ctx,{ type:'line', data:{ labels:labels, datasets:[{label:'CO₂ Emissions (kg)', data:data, borderColor:'#00796b', fill:false}] } });
+}
+</script>
+</body>
+</html>
