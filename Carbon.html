@@ -2,51 +2,124 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Aetherix - Carbon Calculator</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; }
 header { background:#009688; color:white; padding:20px; text-align:center; }
-nav { background:#004d40; display:flex; justify-content:center; }
-nav a { color:white; padding:15px 25px; text-decoration:none; }
-nav a:hover { background:#00796b; }
+nav { background:#004d40; display:flex; justify-content:center; flex-wrap: wrap; }
+nav a { color:white; padding:10px 20px; text-decoration:none; margin:2px; }
+nav a:hover, nav a.active { background:#00796b; }
 section { padding:30px; text-align:center; }
+label { display:block; margin:10px 0; }
+input, select { padding:5px; width:150px; }
 button { padding:10px 20px; background:#009688; color:white; border:none; cursor:pointer; margin-top:10px; }
 button:hover { background:#00796b; }
-input { padding:5px; margin:5px; width:150px; }
 canvas { margin-top:20px; }
+.result { margin-top:20px; background:white; padding:20px; border-radius:10px; display:inline-block; }
+.big { font-size:2em; font-weight:bold; }
+.tips ul { text-align:left; display:inline-block; margin-top:10px; }
 </style>
 </head>
 <body>
-<header><h1>Carbon Footprint Calculator</h1></header>
+<header><h1>Aetherix — Carbon Footprint Calculator</h1></header>
 <nav>
-<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+<a href="Home.html">Home</a>
+<a href="Carbon.html" class="active">Carbon Calculator</a>
+<a href="LiveData.html">Live Data</a>
+<a href="AISolutions.html">AI Solutions</a>
+<a href="Personalize.html">Personalize</a>
+<a href="Chat.html">Chat</a>
+<a href="FaceID.html">Face ID</a>
+<a href="News.html">News</a>
+<a href="About.html">About</a>
+<a href="Maths.html">Maths</a>
 </nav>
+
 <section>
 <h2>Enter Your Data</h2>
-<p>Provide approximate daily consumption:</p>
-<label>Electricity (kWh): <input type="number" id="electricity"></label><br>
-<label>Transport (km/day): <input type="number" id="transport"></label><br>
-<label>Food (kg/day): <input type="number" id="food"></label><br>
+<p>Provide typical weekly/monthly activities and get your annual CO₂e estimate:</p>
+
+<label>Average kilometers driven per week:
+  <input id="kmPerWeek" type="number" min="0" value="30" />
+</label>
+
+<label>Average monthly electricity usage (kWh):
+  <input id="kwhPerMonth" type="number" min="0" value="250" />
+</label>
+
+<label>Number of flights (short-haul) per year:
+  <input id="flightsShort" type="number" min="0" value="0" />
+</label>
+
+<label>Number of flights (long-haul) per year:
+  <input id="flightsLong" type="number" min="0" value="0" />
+</label>
+
+<label>Diet:
+  <select id="diet">
+    <option value="2.5">Omnivore (average)</option>
+    <option value="1.8">Vegetarian</option>
+    <option value="1.5">Vegan</option>
+  </select>
+</label>
+
 <button onclick="calculate()">Calculate Carbon Footprint</button>
 <canvas id="carbonChart" width="400" height="400"></canvas>
 <br>
 <button onclick="downloadPNG()">Download Result as PNG</button>
+
+<div id="resultCard" class="result hidden">
+  <h3>Your estimated annual emissions</h3>
+  <p id="totalCO2" class="big">— kg CO₂e / year</p>
+  <section class="tips">
+    <h4>Top tips to reduce emissions</h4>
+    <ul id="tipsList"></ul>
+  </section>
+</div>
 </section>
 
 <script>
 function calculate() {
-    const electricity = Number(document.getElementById('electricity').value);
-    const transport = Number(document.getElementById('transport').value);
-    const food = Number(document.getElementById('food').value);
-    const total = electricity*0.5 + transport*0.3 + food*0.2;
+    const km = Number(document.getElementById('kmPerWeek').value);
+    const kwh = Number(document.getElementById('kwhPerMonth').value);
+    const shortFlights = Number(document.getElementById('flightsShort').value);
+    const longFlights = Number(document.getElementById('flightsLong').value);
+    const dietFactor = Number(document.getElementById('diet').value);
 
+    // Simplified annual CO2 calculation (demo purposes)
+    const transportCO2 = km * 52 * 0.21; // kg CO2 per km per year
+    const electricityCO2 = kwh * 12 * 0.233; // kg CO2 per year
+    const flightsCO2 = shortFlights * 250 + longFlights * 1100; // kg CO2 per year
+    const dietCO2 = dietFactor * 365; // kg CO2 per year
+
+    const totalCO2 = transportCO2 + electricityCO2 + flightsCO2 + dietCO2;
+
+    document.getElementById('totalCO2').innerText = totalCO2.toFixed(2) + " kg CO₂e / year";
+    document.getElementById('resultCard').classList.remove('hidden');
+
+    const tips = [];
+    if(km > 100) tips.push("Consider carpooling or using public transport.");
+    if(kwh > 300) tips.push("Reduce electricity consumption or switch to renewable sources.");
+    if(shortFlights + longFlights > 0) tips.push("Limit air travel or use alternative transport.");
+    if(dietFactor > 1.5) tips.push("Try reducing meat consumption.");
+
+    const tipsList = document.getElementById('tipsList');
+    tipsList.innerHTML = '';
+    tips.forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = t;
+        tipsList.appendChild(li);
+    });
+
+    // Chart data
     const data = {
-        labels: ['Electricity', 'Transport', 'Food'],
+        labels: ['Transport', 'Electricity', 'Flights', 'Diet'],
         datasets: [{
-            label: 'Carbon Contribution',
-            data: [electricity*0.5, transport*0.3, food*0.2],
-            backgroundColor: ['#00796b','#4db6ac','#b2dfdb']
+            label: 'CO₂e Contribution',
+            data: [transportCO2, electricityCO2, flightsCO2, dietCO2],
+            backgroundColor: ['#00796b','#4db6ac','#b2dfdb','#80cbc4']
         }]
     };
 
