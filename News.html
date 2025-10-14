@@ -10,17 +10,22 @@ nav { background:#004d40; display:flex; justify-content:center; }
 nav a { color:white; padding:15px 25px; text-decoration:none; }
 nav a:hover { background:#00796b; }
 section { padding:30px; }
-.article { background:#b2dfdb; margin:10px auto; padding:10px; border-radius:10px; max-width:700px; }
+.article { background:#b2dfdb; margin:10px auto; padding:15px; border-radius:10px; max-width:700px; }
+.article h3 { margin:0; color:#004d40; }
+.article p { margin:5px 0; }
+.article a { color:#00796b; text-decoration:none; }
+.article a:hover { text-decoration:underline; }
 </style>
 </head>
 <body>
-<header><h1>Climate News & SDG Articles</h1></header>
+<header><h1>Aetherix - Live Climate News</h1></header>
 <nav>
 <a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
 </nav>
 <section>
 <h2>Live Climate News</h2>
-<div id="liveNews"></div>
+<div id="newsFeed">Loading news...</div>
+
 <h2>Static SDG-13 Articles</h2>
 <div class="article">
 <h3>SDG 13: Climate Action</h3>
@@ -33,16 +38,30 @@ section { padding:30px; }
 </section>
 
 <script>
-const newsAPIKey = "6ef9e34c79b6405f83a12de44079e188";
-async function fetchNews() {
-    const res = await fetch(`https://newsapi.org/v2/everything?q=climate&sortBy=publishedAt&apiKey=${newsAPIKey}`);
-    const data = await res.json();
-    let html = "";
-    data.articles.slice(0,5).forEach(a => {
-        html += `<div class="article"><h3>${a.title}</h3><p>${a.description || ''}</p><a href="${a.url}" target="_blank">Read more</a></div>`;
-    });
-    document.getElementById('liveNews').innerHTML = html;
+const apiKey = '6ef9e34c79b6405f83a12de44079e188';
+
+async function fetchNews(){
+    try {
+        const response = await fetch(`https://newsapi.org/v2/everything?q=climate&language=en&sortBy=publishedAt&apiKey=${apiKey}`);
+        const data = await response.json();
+        if(data.status !== "ok"){ document.getElementById('newsFeed').innerText="Failed to fetch news."; return; }
+
+        const articles = data.articles.slice(0, 5); // show latest 5
+        let html = "";
+        articles.forEach(a => {
+            html += `<div class="article">
+                <h3>${a.title}</h3>
+                <p>${a.description || ''}</p>
+                <a href="${a.url}" target="_blank">Read more</a>
+            </div>`;
+        });
+        document.getElementById('newsFeed').innerHTML = html;
+    } catch(err){
+        console.error(err);
+        document.getElementById('newsFeed').innerText="Error loading news.";
+    }
 }
+
 fetchNews();
 </script>
 </body>
