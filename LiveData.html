@@ -2,64 +2,132 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aetherix - Live Data</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aetherix - Live Weather & CO₂ Data</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; }
 header { background:#009688; color:white; padding:20px; text-align:center; }
-nav { background:#004d40; display:flex; justify-content:center; }
-nav a { color:white; padding:15px 25px; text-decoration:none; }
-nav a:hover { background:#00796b; }
+nav { background:#004d40; display:flex; justify-content:center; flex-wrap: wrap; }
+nav a { color:white; padding:10px 20px; text-decoration:none; margin:2px; }
+nav a:hover, nav a.active { background:#00796b; }
 section { padding:30px; text-align:center; }
 input { padding:5px; width:150px; margin:5px; }
 button { padding:10px 20px; background:#009688; color:white; border:none; cursor:pointer; margin-top:10px; }
 button:hover { background:#00796b; }
 canvas { margin-top:20px; }
+.row { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; }
+.col { flex:1 1 300px; max-width:500px; }
+.card { background:white; padding:20px; border-radius:10px; margin-top:20px; }
+.muted { color:#555; }
+.small { font-size:0.9em; }
+.hidden { display:none; }
 </style>
 </head>
 <body>
-<header><h1>Live Weather Data</h1></header>
+<header><h1>Aetherix — Live Weather & CO₂ Data</h1></header>
 <nav>
-<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+<a href="Home.html">Home</a>
+<a href="Carbon.html">Carbon Calculator</a>
+<a href="LiveData.html" class="active">Live Data</a>
+<a href="AISolutions.html">AI Solutions</a>
+<a href="Personalize.html">Personalize</a>
+<a href="Chat.html">Chat</a>
+<a href="FaceID.html">Face ID</a>
+<a href="News.html">News</a>
+<a href="About.html">About</a>
+<a href="Maths.html">Maths</a>
 </nav>
-<section>
-<h2>Check Weather</h2>
-<input type="text" id="city" placeholder="Enter City">
-<button onclick="getWeather()">Get Weather</button>
-<p id="weather"></p>
-<canvas id="weatherChart" width="400" height="400"></canvas>
-<br>
-<button onclick="downloadWeatherPNG()">Download Graph</button>
+
+<section class="row">
+  <div class="col">
+    <div class="card">
+      <h2>Check Weather</h2>
+      <input type="text" id="cityInput" placeholder="Enter City">
+      <div>
+        <button onclick="getWeather()">Get Weather</button>
+        <button onclick="useMyLocation()">Use My Location</button>
+      </div>
+      <p id="weatherSummary"></p>
+      <canvas id="weatherChart" width="400" height="400"></canvas>
+      <br>
+      <button onclick="downloadWeatherPNG()">Download Weather Graph</button>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <h2>CO₂ Trend (Monthly)</h2>
+      <canvas id="co2Chart" height="220"></canvas>
+      <p class="muted small">If a public CO₂ API is available, real data will be shown; otherwise simulated values are displayed.</p>
+      <button onclick="downloadCO2PNG()">Download CO₂ Graph</button>
+    </div>
+  </div>
 </section>
 
 <script>
-    
-    const apiKey = 'c4e702afaf461f9258279cb7c3eb0c4d';
+const apiKey = 'c4e702afaf461f9258279cb7c3eb0c4d';
 
+// WEATHER FUNCTIONS
 async function getWeather() {
-    const city = document.getElementById('city').value;
+    const city = document.getElementById('cityInput').value;
+    if(!city) { alert("Enter a city!"); return; }
+
     const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`);
     const data = await res.json();
-    if(data.cod !== "200" && data.cod !== 200) { alert("City not found!"); return; }
+    if(data.cod != 200) { alert("City not found!"); return; }
 
-    let labels = [];
-    let temps = [];
-    data.list.slice(0,8).forEach(item => { labels.push(item.dt_txt.split(' ')[1]); temps.push(item.main.temp); });
+    const labels = [];
+    const temps = [];
+    data.list.slice(0,8).forEach(item => {
+        labels.push(item.dt_txt.split(' ')[1]);
+        temps.push(item.main.temp);
+    });
 
-    document.getElementById('weather').innerText = `Current Temp: ${temps[0]}°C`;
+    document.getElementById('weatherSummary').innerText = `Current Temp: ${temps[0]}°C`;
 
     if(window.weatherChart) window.weatherChart.destroy();
     const ctx = document.getElementById('weatherChart').getContext('2d');
     window.weatherChart = new Chart(ctx, {
         type:'line',
-        data: { labels:labels, datasets:[{ label:'Temperature (°C)', data:temps, borderColor:'#00796b', fill:false }] }
+        data:{ labels, datasets:[{ label:'Temperature (°C)', data:temps, borderColor:'#00796b', fill:false }] }
     });
+}
+
+function useMyLocation() {
+    if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async pos => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
+            const data = await res.json();
+            if(data.cod != 200) { alert("Weather not found!"); return; }
+            document.getElementById('cityInput').value = data.city.name;
+            getWeather();
+        });
+    } else alert("Geolocation not supported!");
 }
 
 function downloadWeatherPNG() {
     const link = document.createElement('a');
     link.download = 'weather_graph.png';
     link.href = document.getElementById('weatherChart').toDataURL();
+    link.click();
+}
+
+// CO2 TREND FUNCTIONS (SIMULATED)
+const co2Data = [410, 412, 415, 413, 416, 418, 420, 422, 425, 423, 426, 428]; // example ppm
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ctxCO2 = document.getElementById('co2Chart').getContext('2d');
+const co2Chart = new Chart(ctxCO2,{
+    type:'line',
+    data:{ labels:months, datasets:[{ label:'CO₂ ppm', data:co2Data, borderColor:'#004d40', fill:false }] }
+});
+
+function downloadCO2PNG() {
+    const link = document.createElement('a');
+    link.download = 'co2_graph.png';
+    link.href = document.getElementById('co2Chart').toDataURL();
     link.click();
 }
 </script>
