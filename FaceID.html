@@ -2,78 +2,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aetherix - FaceID</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aetherix — Face ID</title>
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <style>
 body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
 header { background:#009688; color:white; padding:20px; }
-nav { background:#004d40; display:flex; justify-content:center; }
-nav a { color:white; padding:15px 25px; text-decoration:none; }
-nav a:hover { background:#00796b; }
+nav { background:#004d40; display:flex; justify-content:center; flex-wrap:wrap; }
+nav a { color:white; padding:10px 20px; margin:2px; text-decoration:none; }
+nav a:hover, nav a.active { background:#00796b; }
 section { padding:20px; }
 video { border:1px solid #004d40; margin-top:10px; }
-p { font-size:16px; margin-top:15px; }
+button { padding:10px 20px; margin:5px; background:#009688; color:white; border:none; cursor:pointer; }
+button:hover { background:#00796b; }
+.card { background:white; padding:15px; border-radius:10px; display:inline-block; margin-top:10px; }
+.hidden { display:none; }
+#profilePhoto { border-radius: 50%; width: 120px; height: 120px; margin-top: 10px; border:2px solid #004d40; }
 </style>
 </head>
 <body>
+
 <header>
-<h1><span>Aetherix</span> - Face ID</h1>
+<h1>Aetherix — Face ID</h1>
 </header>
 <nav>
-<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+<a href="personalize.html">Personalize</a>
+<a href="faceid.html" class="active">Face ID</a>
+<a href="Carbon.html">Carbon Calculator</a>
+<a href="LiveData.html">Live Data</a>
+<a href="AISolutions.html">AI Solutions</a>
 </nav>
+
 <section>
-<video id="video" width="320" height="240" autoplay muted></video>
+<h2>Face Recognition</h2>
+
+<div class="card">
+<video id="video" width="320" height="240" autoplay muted></video><br>
 <p id="result">Scanning for faces...</p>
+<img id="profilePhoto" class="hidden">
+<button id="registerPromptBtn" class="hidden">Register Your Profile</button>
+</div>
 </section>
 
 <script>
-// Load models
+const video = document.getElementById('video');
+const resultText = document.getElementById('result');
+const registerPromptBtn = document.getElementById('registerPromptBtn');
+const profilePhoto = document.getElementById('profilePhoto');
+
+// Load Face API models
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights'),
   faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights'),
   faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights')
 ]).then(startVideo);
 
-const video = document.getElementById('video');
-
-function startVideo(){
+function startVideo() {
   navigator.mediaDevices.getUserMedia({ video:{} })
   .then(stream => video.srcObject = stream)
-  .catch(err => console.error("Webcam error:", err));
+  .catch(err => alert("Camera error: " + err));
 }
 
 video.addEventListener('play', async () => {
   const profiles = JSON.parse(localStorage.getItem('profiles')||"[]");
-  if(profiles.length===0){ document.getElementById('result').innerText="No saved profiles."; return; }
+  if(profiles.length===0){ 
+    resultText.innerText="No saved profiles. Please register."; 
+    return; 
+  }
 
-  const labeledDescriptors = profiles.map(p => new faceapi.LabeledFaceDescriptors(p.name, [new Float32Array(p.descriptor)]));
+  const labeledDescriptors = profiles.map(p => new faceapi.LabeledFaceDescriptors(p.name,[new Float32Array(p.descriptor)]));
   const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
 
-  const canvas = faceapi.createCanvasFromMedia(video);
-  document.body.append(canvas);
-  const displaySize = { width: video.width, height: video.height };
-  faceapi.matchDimensions(canvas, displaySize);
+  const recognitionCanvas = faceapi.createCanvasFromMedia(video);
+  document.body.appendChild(recognitionCanvas);
+  const displaySize = {width: video.width, height: video.height};
+  faceapi.matchDimensions(recognitionCanvas, displaySize);
 
-  setInterval(async () => {
-    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+  setInterval(async ()=>{
+    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                          .withFaceLandmarks().withFaceDescriptors();
     const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
-    faceapi.draw.drawDetections(canvas, resizedDetections);
+    recognitionCanvas.getContext('2d').clearRect(0,0,recognitionCanvas.width,recognitionCanvas.height);
+    faceapi.draw.drawDetections(recognitionCanvas,resizedDetections);
 
-    if(detections.length > 0){
+    if(detections.length>0){
       const bestMatch = faceMatcher.findBestMatch(detections[0].descriptor);
-      if(bestMatch.label !== "unknown"){
-        const profile = profiles.find(p => p.name === bestMatch.label);
-        document.getElementById('result').innerText = `Name: ${profile.name}, Age: ${profile.age}, Gender: ${profile.gender}`;
+      if(bestMatch.label!=="unknown"){
+        const profile = profiles.find(p=>p.name===bestMatch.label);
+        resultText.innerText = `Hello, ${profile.name}! Age: ${profile.age}, Gender: ${profile.gender}`;
+        profilePhoto.src = profile.photo;
+        profilePhoto.classList.remove('hidden');
+        registerPromptBtn.classList.add('hidden');
       } else {
-        document.getElementById('result').innerText = "Face not recognized.";
+        resultText.innerText = "Face not recognized!";
+        profilePhoto.classList.add('hidden');
+        registerPromptBtn.classList.remove('hidden');
       }
     } else {
-      document.getElementById('result').innerText = "No face detected.";
+      resultText.innerText = "No face detected.";
+      profilePhoto.classList.add('hidden');
+      registerPromptBtn.classList.add('hidden');
     }
-  }, 1000);
+  },1000);
+});
+
+// Register button
+registerPromptBtn.addEventListener('click', ()=>{
+  alert("Please register your profile in the Personalize page.");
 });
 </script>
+
 </body>
 </html>
