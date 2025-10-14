@@ -9,13 +9,15 @@ header { background:#009688; color:white; padding:25px; text-align:center; font-
 nav { background:#004d40; display:flex; justify-content:center; flex-wrap:wrap; }
 nav a { color:white; padding:12px 20px; text-decoration:none; font-weight:bold; }
 nav a:hover { background:#00796b; border-radius:5px; }
-section { padding:30px; max-width:900px; margin:auto; }
-.news-article { background:#b2dfdb; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
-.news-article h3 { margin:0 0 10px 0; color:#004d40; font-size:20px; }
-.news-article p { margin:0 0 10px 0; }
-.news-article a { color:#00796b; font-weight:bold; text-decoration:none; }
-.news-article a:hover { text-decoration:underline; }
-h2 { color:#004d40; }
+section { padding:30px; max-width:1000px; margin:auto; }
+.news-article { background:#b2dfdb; display:flex; flex-wrap:wrap; padding:15px; margin:15px 0; border-radius:12px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
+.news-article img { width:200px; height:120px; object-fit:cover; border-radius:10px; margin-right:15px; }
+.news-content { flex:1; min-width:200px; }
+.news-content h3 { margin:0 0 10px 0; color:#004d40; font-size:20px; }
+.news-content p { margin:0 0 10px 0; }
+.news-content a { color:#00796b; font-weight:bold; text-decoration:none; }
+.news-content a:hover { text-decoration:underline; }
+h2 { color:#004d40; margin-top:40px; }
 </style>
 </head>
 <body>
@@ -39,28 +41,39 @@ h2 { color:#004d40; }
 
 <h2>SDG-13: Static Articles</h2>
 <div class="news-article">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Climate_change_icon.svg/200px-Climate_change_icon.svg.png" alt="SDG 13">
+<div class="news-content">
 <h3>SDG 13: Climate Action</h3>
 <p>Take urgent action to combat climate change and its impacts.</p>
 </div>
+</div>
 <div class="news-article">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Carbon_footprint_icon.svg/200px-Carbon_footprint_icon.svg.png" alt="Carbon">
+<div class="news-content">
 <h3>Reducing Carbon Footprints</h3>
 <p>Learn practical steps to reduce CO₂ emissions in daily life.</p>
+</div>
 </div>
 </section>
 
 <script>
 const apiKey = '6ef9e34c79b6405f83a12de44079e188';
+
 async function fetchNews() {
     try {
         const res = await fetch(`https://newsapi.org/v2/everything?q=climate&language=en&sortBy=publishedAt&pageSize=5&apiKey=${apiKey}`);
         const data = await res.json();
         if(data.status !== "ok") throw new Error("Failed to fetch");
 
-        const feed = data.articles.map(article => {
+        const feed = data.articles.map(a => {
+            const img = a.urlToImage ? a.urlToImage : 'https://via.placeholder.com/200x120?text=No+Image';
             return `<div class="news-article">
-                        <h3>${article.title}</h3>
-                        <p>${article.description || ''}</p>
-                        <a href="${article.url}" target="_blank">Read full article</a>
+                        <img src="${img}" alt="News Image">
+                        <div class="news-content">
+                            <h3>${a.title}</h3>
+                            <p>${a.description || ''}</p>
+                            <a href="${a.url}" target="_blank">Read full article</a>
+                        </div>
                     </div>`;
         }).join('');
 
@@ -71,8 +84,8 @@ async function fetchNews() {
     }
 }
 
-// Load news when page opens
 fetchNews();
 </script>
 </body>
 </html>
+
