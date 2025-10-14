@@ -33,7 +33,7 @@ section { padding:30px; }
 </section>
 
 <script>
-const newsAPIKey = "YOUR_NEWSAPI_KEY";
+const newsAPIKey = "6ef9e34c79b6405f83a12de44079e188";
 async function fetchNews() {
     const res = await fetch(`https://newsapi.org/v2/everything?q=climate&sortBy=publishedAt&apiKey=${newsAPIKey}`);
     const data = await res.json();
