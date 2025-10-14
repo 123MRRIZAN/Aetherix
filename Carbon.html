@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aetherix - Carbon Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; }
+header { background:#009688; color:white; padding:20px; text-align:center; }
+nav { background:#004d40; display:flex; justify-content:center; }
+nav a { color:white; padding:15px 25px; text-decoration:none; }
+nav a:hover { background:#00796b; }
+section { padding:30px; text-align:center; }
+button { padding:10px 20px; background:#009688; color:white; border:none; cursor:pointer; margin-top:10px; }
+button:hover { background:#00796b; }
+input { padding:5px; margin:5px; width:150px; }
+canvas { margin-top:20px; }
+</style>
+</head>
+<body>
+<header><h1>Carbon Footprint Calculator</h1></header>
+<nav>
+<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+</nav>
+<section>
+<h2>Enter Your Data</h2>
+<p>Provide approximate daily consumption:</p>
+<label>Electricity (kWh): <input type="number" id="electricity"></label><br>
+<label>Transport (km/day): <input type="number" id="transport"></label><br>
+<label>Food (kg/day): <input type="number" id="food"></label><br>
+<button onclick="calculate()">Calculate Carbon Footprint</button>
+<canvas id="carbonChart" width="400" height="400"></canvas>
+<br>
+<button onclick="downloadPNG()">Download Result as PNG</button>
+</section>
+
+<script>
+function calculate() {
+    const electricity = Number(document.getElementById('electricity').value);
+    const transport = Number(document.getElementById('transport').value);
+    const food = Number(document.getElementById('food').value);
+    const total = electricity*0.5 + transport*0.3 + food*0.2;
+
+    const data = {
+        labels: ['Electricity', 'Transport', 'Food'],
+        datasets: [{
+            label: 'Carbon Contribution',
+            data: [electricity*0.5, transport*0.3, food*0.2],
+            backgroundColor: ['#00796b','#4db6ac','#b2dfdb']
+        }]
+    };
+
+    if(window.myChart) window.myChart.destroy();
+    const ctx = document.getElementById('carbonChart').getContext('2d');
+    window.myChart = new Chart(ctx, { type:'pie', data:data });
+}
+
+function downloadPNG() {
+    const link = document.createElement('a');
+    link.download = 'carbon_result.png';
+    link.href = document.getElementById('carbonChart').toDataURL();
+    link.click();
+}
+</script>
+</body>
+</html>
