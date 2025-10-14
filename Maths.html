@@ -2,43 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aetherix - Maths & Atmosphere</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mathematics Behind Aetherix</title>
+<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
-header { background:#009688; color:white; padding:20px; }
-nav { background:#004d40; display:flex; justify-content:center; }
-nav a { color:white; padding:15px 25px; text-decoration:none; }
-nav a:hover { background:#00796b; }
-section { padding:30px; }
-input { padding:5px; margin:5px; }
-button { padding:10px 20px; margin-top:10px; background:#009688; color:white; border:none; cursor:pointer; }
-button:hover { background:#00796b; }
-</style>
-</head>
-<body>
-<header><h1>Atmospheric Data & Math Modeling</h1></header>
-<nav>
-<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
-</nav>
-<section>
-<h2>CO₂ Emissions Graph</h2>
-<label>Enter Days: <input type="number" id="days" value="7"></label><br>
-<button onclick="plotGraph()">Plot CO₂</button>
-<canvas id="co2Chart" width="400" height="300"></canvas>
-</section>
-
 <script>
-function plotGraph() {
-    const days = Number(document.getElementById('days').value);
-    const labels = [];
-    const data = [];
-    for(let i=1;i<=days;i++){ labels.push(`Day ${i}`); data.push(Math.floor(Math.random()*50 + 50)); }
+function updateEmission() {
+  let km = parseFloat(document.getElementById('km').value) || 0;
+  let ef = 0.21; // kg CO2 per km
+  let emission = (km * ef).toFixed(2);
+  document.getElementById('emissionResult').innerText = `Your estimated CO₂ emission: ${emission} kg`;
 
-    if(window.co2Chart) window.co2Chart.destroy();
-    const ctx = document.getElementById('co2Chart').getContext('2d');
-    window.co2Chart = new Chart(ctx,{ type:'line', data:{ labels:labels, datasets:[{label:'CO₂ Emissions (kg)', data:data, borderColor:'#00796b', fill:false}] } });
+  // Plot simulation
+  const ctx = document.getElementById('mathChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['2021','2022','2023','2024','2025'],
+      datasets: [{
+        label: 'CO₂ (tons)',
+        data: [40, 42, 45, 47, 50],
+        borderWidth: 2,
+        fill: false,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { title: { display: true, text: 'CO₂ Emissions (tons)' } },
+        x: { title: { display: true, text: 'Year' } }
+      }
+    }
+  });
 }
 </script>
+</head>
+
+<body>
+<nav>
+  <div class="logo">Aetherix</div>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="carbon.html">Carbon Calculator</a></li>
+    <li><a href="live.html">Live Data</a></li>
+    <li><a href="ai.html">AI Solutions</a></li>
+    <li><a href="personalize.html">Personalize</a></li>
+    <li><a href="chat.html">Chat</a></li>
+    <li><a href="faceid.html">FaceID</a></li>
+    <li><a href="news.html">News</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="maths.html" class="active">Maths</a></li>
+  </ul>
+</nav>
+
+<h2>Mathematics Behind Aetherix</h2>
+
+<div class="container">
+  <p>
+    Mathematics is the foundation of Aetherix — every climate model, AI prediction, and sustainability analysis 
+    relies on mathematical principles. This page demonstrates how equations and data visualization support 
+    <b>SDG 13: Climate Action</b> through measurable insights.
+  </p>
+
+  <h3>1️⃣ Carbon Emission Formula</h3>
+  <p>
+    The carbon footprint is calculated using:
+    <br><b>CO₂ = Distance (km) × Emission Factor (kg CO₂/km)</b>
+  </p>
+
+  <label>Enter average distance travelled per week (in km):</label>
+  <input id="km" type="number" placeholder="e.g. 200">
+  <button onclick="updateEmission()">Calculate Emission</button>
+  <p id="emissionResult"></p>
+
+  <hr>
+  <h3>2️⃣ Visualizing Climate Trends</h3>
+  <p>
+    Mathematical graphs help represent how CO₂ emissions grow over time. The line below 
+    represents an increasing trend in emissions and can be modeled using a linear equation:
+    <br><b>y = mx + c</b> where <b>m</b> is the rate of increase and <b>c</b> is the base level.
+  </p>
+  <canvas id="mathChart" width="400" height="200"></canvas>
+
+  <hr>
+  <h3>3️⃣ Predictive Modelling with AI</h3>
+  <p>
+    Artificial Intelligence uses mathematical operations like matrix multiplication and gradient descent 
+    to predict future patterns. These are built on algebra, calculus, and statistics — all fundamental 
+    branches of mathematics that make intelligent predictions possible.
+  </p>
+
+  <h3>4️⃣ Optimization & Reduction</h3>
+  <p>
+    Using optimization algorithms, AI can help minimize energy waste and emissions. This directly relates to 
+    mathematical techniques like <b>minimization of functions</b> and <b>derivative-based optimization</b>.
+  </p>
+
+  <p style="margin-top: 30px; text-align:center; font-style:italic;">
+    Developed by MUHAMMED RIZAN, HEMANTH SANKER, ABDUL KAREEM
+  </p>
+</div>
 </body>
 </html>
