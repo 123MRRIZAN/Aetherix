@@ -7,12 +7,13 @@
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#e0f7fa; color:#003366; }
 header { background:#009688; color:white; padding:20px; text-align:center; animation:fadeIn 2s;}
 @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-nav { background:#004d40; display:flex; justify-content:center; }
-nav a { color:white; padding:15px 25px; text-decoration:none; display:inline-block; }
+nav { background:#004d40; display:flex; justify-content:center; flex-wrap:wrap; }
+nav a { color:white; padding:15px 25px; text-decoration:none; display:inline-block; margin:2px; }
 nav a:hover { background:#00796b; }
-section { padding:30px; text-align:center; }
+section { padding:30px; text-align:center; max-width:800px; margin:auto; }
 h1 span { color:#4db6ac; animation: glow 1.5s infinite alternate; }
 @keyframes glow { from { text-shadow:0 0 5px #4db6ac; } to { text-shadow:0 0 20px #004d40; } }
+footer { text-align:center; padding:20px; font-style:italic; margin-top:30px; color:#004d40; }
 </style>
 </head>
 <body>
@@ -20,6 +21,7 @@ h1 span { color:#4db6ac; animation: glow 1.5s infinite alternate; }
 <h1><span>Aetherix</span></h1>
 <p>Exploring Science, Environment & AI</p>
 </header>
+
 <nav>
 <a href="index.html">Home</a>
 <a href="Carbon.html">Carbon Calculator</a>
@@ -29,9 +31,19 @@ h1 span { color:#4db6ac; animation: glow 1.5s infinite alternate; }
 <a href="News.html">News</a>
 <a href="About.html">About</a>
 </nav>
+
 <section>
 <h2>Welcome to Aetherix</h2>
 <p>Discover your carbon footprint, explore real-time atmospheric data, interact with AI, and visualize science in action!</p>
+
+<h3>Our Contribution to SDG Goal 13: Climate Action</h3>
+<p>
+Aetherix supports <strong>SDG Goal 13</strong> by helping users understand and reduce their carbon footprint, visualize environmental data, and explore AI-powered solutions that contribute to sustainable climate action. By connecting mathematics, technology, and awareness, the platform empowers individuals to take measurable steps toward protecting our planet.
+</p>
 </section>
+
+<footer>
+<p>Developed by MUHAMMED RIZAN, HEMANTH SHANKER, ABDUL KAREEM</p>
+</footer>
 </body>
 </html>
