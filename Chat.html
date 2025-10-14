@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aetherix - AI Chat</title>
+<style>
+body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
+header { background:#009688; color:white; padding:20px; }
+nav { background:#004d40; display:flex; justify-content:center; }
+nav a { color:white; padding:15px 25px; text-decoration:none; }
+nav a:hover { background:#00796b; }
+section { padding:30px; }
+input { padding:5px; margin:5px; width:300px; }
+button { padding:10px 20px; margin-top:10px; background:#009688; color:white; border:none; cursor:pointer; }
+button:hover { background:#00796b; }
+#chatBox { width:80%; height:300px; border:1px solid #004d40; margin:20px auto; overflow:auto; background:white; text-align:left; padding:10px; }
+</style>
+</head>
+<body>
+<header><h1>AI Chat Interface</h1></header>
+<nav>
+<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+</nav>
+<section>
+<div id="chatBox"></div>
+<input type="text" id="userInput" placeholder="Type your message...">
+<button onclick="sendMessage()">Send</button>
+<button onclick="downloadChat()">Download Chat</button>
+</section>
+
+<script>
+let chatLog = [];
+
+function sendMessage() {
+    const input = document.getElementById('userInput').value;
+    if(!input) return;
+    chatLog.push(`You: ${input}`);
+    let reply = "AI: This is a placeholder reply."; // Replace with AI API if needed
+    chatLog.push(reply);
+    document.getElementById('chatBox').innerText = chatLog.join('\n');
+    document.getElementById('userInput').value = '';
+}
+
+function downloadChat() {
+    const blob = new Blob([chatLog.join('\n')], {type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'chat.docx';
+    link.click();
+}
+</script>
+</body>
+</html>
