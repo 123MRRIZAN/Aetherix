@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aetherix - Personalize</title>
+<style>
+body { font-family: Arial; background:#e0f7fa; color:#003366; margin:0; padding:0; text-align:center; }
+header { background:#009688; color:white; padding:20px; }
+nav { background:#004d40; display:flex; justify-content:center; }
+nav a { color:white; padding:15px 25px; text-decoration:none; }
+nav a:hover { background:#00796b; }
+section { padding:30px; }
+input { padding:5px; margin:5px; }
+button { padding:10px 20px; margin-top:10px; background:#009688; color:white; border:none; cursor:pointer; }
+button:hover { background:#00796b; }
+canvas { display:none; }
+</style>
+</head>
+<body>
+<header><h1>Personalized Profile Card</h1></header>
+<nav>
+<a href="Home.html">Home</a><a href="Carbon.html">Carbon Calculator</a><a href="LiveData.html">Live Data</a><a href="AISolutions.html">AI Solutions</a><a href="Personalize.html">Personalize</a><a href="Chat.html">Chat</a><a href="FaceID.html">Face ID</a><a href="News.html">News</a><a href="About.html">About</a><a href="Maths.html">Maths</a>
+</nav>
+<section>
+<h2>Enter Your Details</h2>
+<input type="text" id="name" placeholder="Name"><br>
+<input type="number" id="age" placeholder="Age"><br>
+<input type="text" id="gender" placeholder="Gender"><br>
+<button onclick="generateCard()">Generate Profile PNG</button>
+<canvas id="cardCanvas" width="400" height="200"></canvas>
+</section>
+
+<script>
+function generateCard() {
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const gender = document.getElementById('gender').value;
+
+    const canvas = document.getElementById('cardCanvas');
+    canvas.style.display = 'block';
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#b2dfdb';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#004d40';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Name: ${name}`, 20, 50);
+    ctx.fillText(`Age: ${age}`, 20, 90);
+    ctx.fillText(`Gender: ${gender}`, 20, 130);
+
+    // Download PNG
+    const link = document.createElement('a');
+    link.download = 'profile_card.png';
+    link.href = canvas.toDataURL();
+    link.click();
+}
+</script>
+</body>
+</html>
